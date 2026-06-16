@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シンプル単語帳</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card-container">
+        <div id="status-message" class="status">問題を読み込み中...</div>
+
+        <div id="card" class="card hidden">
+            <div id="card-content" class="card-content">問題文がここに表示されます</div>
+        </div>
+
+        <div id="controls" class="controls hidden">
+            <button id="toggle-btn" class="btn">解説を見る</button>
+            <button id="next-btn" class="btn primary">次の問題へ</button>
+        </div>
+    </div>
+
+    <script>
+        // 設定: データファイルのパス（同じフォルダ内に置く想定）
+        const DATA_FILE = 'data.txt'; 
+
+        let questions = [];
+        let currentIndex = 0;
+        let isShowingAnswer = false;
+
+        // ページ読み込み完了時に実行
+        window.addEventListener('DOMContentLoaded', loadQuestions);
+
+        // データを取得して初期化する関数
+        async function loadQuestions() {
+            try {
+                const response = await fetch(DATA_FILE);
+                if (!response.ok) throw new Error('データファイルの読み込みに失敗しました');
+                
+                const text = await response.text();
+                // 行ごとに分割し、空行を除外
+                const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                
+                // タブ区切りで問題と解説に分ける
+                questions = lines.map(line => {
+                    const [question, answer] = line.split('\t');
+                    return { question, answer };
+                }).filter(item => item.question && item.answer); // 両方揃っている行だけを採用
+
+                if (questions.length === 0) {
+                    showStatus('問題データが空か、正しく解析できませんでした。');
+                    return;
+                }
+
+                // 問題をシャッフル
+                shuffleArray(questions);
+                
+                // 画面要素の表示切り替え
+                document.getElementById('status-message').classList.add('hidden');
+                document.getElementById('card').classList.remove('hidden');
+                document.getElementById('controls').classList.remove('hidden');
+                
+                showQuestion();
+
+            } catch (error) {
+                showStatus('エラーが発生しました。データファイル（data.txt）が正しい場所に配置されているか確認してください。');
+                console.error(error);
+            }
+        }
+
+        // フィッシャー・イェーツのシャッフルアルゴリズム
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // ステータスメッセージを表示する関数
+        function showStatus(msg) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = msg;
+            statusEl.classList.remove('hidden');
+        }
+
+        // 現在の問題を表示する関数
+        function showQuestion() {
+            isShowingAnswer = false;
+            const cardContent = document.getElementById('card-content');
+            const toggleBtn = document.getElementById('toggle-btn');
+            
+            cardContent.textContent = questions[currentIndex].question;
+            cardContent.classList.remove('answer-mode'); // 問題文のスタイル
+            toggleBtn.textContent = '解説を見る';
+        }
+
+        // 「解説を見る / 問題に戻る」ボタンの処理
+        document.getElementById('toggle-btn').addEventListener('click', () => {
+            const cardContent = document.getElementById('card-content');
+            const toggleBtn = document.getElementById('toggle-btn');
+
+            if (isShowingAnswer) {
+                cardContent.textContent = questions[currentIndex].question;
+                cardContent.classList.remove('answer-mode');
+                toggleBtn.textContent = '解説を見る';
+            } else {
+                cardContent.textContent = questions[currentIndex].answer;
+                cardContent.classList.add('answer-mode'); // 解説文のスタイル（左寄せなど）
+                toggleBtn.textContent = '問題に戻る';
+            }
+            isShowingAnswer = !isShowingAnswer;
+        });
+
+        // 「次の問題へ」ボタンの処理
+        document.getElementById('next-btn').addEventListener('click', () => {
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                showQuestion();
+            } else {
+                // 全問終了時の処理
+                document.getElementById('card').classList.add('hidden');
+                document.getElementById('controls').classList.add('hidden');
+                showStatus('すべての問題を解き終えました。最初から解く場合はページをリロードしてください。');
+            }
+        });
+    </script>
+</body>
+</html>
