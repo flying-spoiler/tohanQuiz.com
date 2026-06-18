@@ -1,5 +1,6 @@
 /* 全体のリセットとベース設定 */
 * {
+    box-shadow: none;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -26,7 +27,7 @@ body {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 /* メッセージ表示エリア */
@@ -36,6 +37,14 @@ body {
     line-height: 1.6;
     color: #555;
     padding: 40px 0;
+}
+
+/* ページ番号のスタイル */
+.page-number {
+    text-align: center;
+    font-size: 1rem;
+    color: #718096;
+    font-weight: bold;
 }
 
 /* 単語帳カードの見た目 */
@@ -55,11 +64,11 @@ body {
     font-size: 1.2rem;
     line-height: 1.6;
     text-align: center;
-    white-space: pre-wrap; /* スプレッドシート内の改行もそのまま表示 */
+    white-space: pre-wrap;
     word-break: break-all;
 }
 
-/* 解説表示モードのスタイル調整（文字色を少し変え、左寄せにする） */
+/* 解説表示モードのスタイル調整 */
 .card-content.answer-mode {
     color: #2b6cb0;
     text-align: left;
@@ -70,14 +79,14 @@ body {
 /* ボタンエリア */
 .controls {
     display: flex;
-    gap: 12px;
+    gap: 8px; /* ボタンが3つになったので少し隙間を狭く */
 }
 
 /* ボタンの基本スタイル */
 .btn {
     flex: 1;
-    padding: 14px;
-    font-size: 1rem;
+    padding: 14px 8px;
+    font-size: 0.95rem; /* 3文字以上でも入りやすいよう少しだけ小さく */
     font-weight: bold;
     border: none;
     border-radius: 8px;
@@ -85,10 +94,10 @@ body {
     background-color: #e2e8f0;
     color: #4a5568;
     transition: background-color 0.2s, transform 0.1s;
-    -webkit-tap-highlight-color: transparent; /* スマホタップ時の青い影を消す */
+    -webkit-tap-highlight-color: transparent;
+    text-align: center;
 }
 
-/* ボタンを押したときの軽い沈み込み効果 */
 .btn:active {
     transform: scale(0.98);
 }
@@ -108,6 +117,11 @@ body {
     display: none !important;
 }
 
+/* 1問目のときに「前の問題へ」のスペースを維持したまま見えなくするクラス */
+.invisible {
+    visibility: hidden !important;
+}
+
 /* スマホ用の微調整 */
 @media (max-width: 480px) {
     .card-container {
@@ -121,6 +135,7 @@ body {
         font-size: 1.1rem;
     }
     .btn {
-        padding: 16px; /* スマホでタップしやすいよう少し太く */
+        padding: 14px 4px;
+        font-size: 0.85rem; /* スマホの縦画面でも3つのボタンが綺麗に収まるサイズ */
     }
 }
