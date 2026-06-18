@@ -10,11 +10,14 @@
     <div class="card-container">
         <div id="status-message" class="status">問題を読み込み中...</div>
 
+        <div id="page-number" class="page-number hidden">0 / 0</div>
+
         <div id="card" class="card hidden">
             <div id="card-content" class="card-content">問題文がここに表示されます</div>
         </div>
 
         <div id="controls" class="controls hidden">
+            <button id="prev-btn" class="btn">前の問題へ</button>
             <button id="toggle-btn" class="btn">解説を見る</button>
             <button id="next-btn" class="btn primary">次の問題へ</button>
         </div>
@@ -57,6 +60,7 @@
                 
                 // 画面要素の表示切り替え
                 document.getElementById('status-message').classList.add('hidden');
+                document.getElementById('page-number').classList.remove('hidden');
                 document.getElementById('card').classList.remove('hidden');
                 document.getElementById('controls').classList.remove('hidden');
                 
@@ -88,10 +92,23 @@
             isShowingAnswer = false;
             const cardContent = document.getElementById('card-content');
             const toggleBtn = document.getElementById('toggle-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const pageNumber = document.getElementById('page-number');
             
+            // 問題文の表示とスタイルリセット
             cardContent.textContent = questions[currentIndex].question;
-            cardContent.classList.remove('answer-mode'); // 問題文のスタイル
+            cardContent.classList.remove('answer-mode'); 
             toggleBtn.textContent = '解説を見る';
+
+            // ページ番号の更新（例: 3 / 20）
+            pageNumber.textContent = `${currentIndex + 1} / ${questions.length}`;
+
+            // 1問目のときは「前の問題へ」ボタンを非表示にする
+            if (currentIndex === 0) {
+                prevBtn.classList.add('invisible');
+            } else {
+                prevBtn.classList.remove('invisible');
+            }
         }
 
         // 「解説を見る / 問題に戻る」ボタンの処理
@@ -105,10 +122,18 @@
                 toggleBtn.textContent = '解説を見る';
             } else {
                 cardContent.textContent = questions[currentIndex].answer;
-                cardContent.classList.add('answer-mode'); // 解説文のスタイル（左寄せなど）
+                cardContent.classList.add('answer-mode'); // 解説文のスタイル
                 toggleBtn.textContent = '問題に戻る';
             }
             isShowingAnswer = !isShowingAnswer;
+        });
+
+        // 「前の問題へ」ボタンの処理
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showQuestion();
+            }
         });
 
         // 「次の問題へ」ボタンの処理
@@ -118,6 +143,7 @@
                 showQuestion();
             } else {
                 // 全問終了時の処理
+                document.getElementById('page-number').classList.add('hidden');
                 document.getElementById('card').classList.add('hidden');
                 document.getElementById('controls').classList.add('hidden');
                 showStatus('すべての問題を解き終えました。最初から解く場合はページをリロードしてください。');
